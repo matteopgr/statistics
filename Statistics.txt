@@ -1,0 +1,55 @@
+Lecture 1
+
+Statistics starts from the notion of population, a set of statistical units of any kind. Usually we look for a specific set of feature of every unit, called characters (more abstract) or variables, the operational version, (when we have a scale of measurement, which can be quantitative or qualitative) that we indicate with (X1, ..., Xn). A variable is the set of all possible values. We will work with univariate and bivariate and we will analyze their distribution (by unit or a frequency distribution). (Knuth) 
+
+
+HM
+
+Research: 
+- basic notions in statistics: population, statistical inits, distribution.
+- notion of average, computational problems with the floating point representation (errors, catastrophic cancellation) and recursive formula as a solution (Knuth).
+
+Programm:
+- We have n servers with m attackers. Each hacker has a probability p to penetrate each server. Make a graphical representation where each hacker is representated like that increases by 1 each time he penetrates a server. Then we want to count the number of hacker that penetrate each possible number of servers (frequency distribution). Used drawline and drawrectangle.
+
+Lecture 2
+
+Along with the mean we have to understand how much is the mean representative of the data set (how far are the observation froma the mean?). That's why we need the measures of dipertion with the measure of position (mean). Ususally we use the square difference between the mean and the observation for math convenience and we calculate the mean of the distances. This is called the "Variance" VAR(x).
+Theoretical population: something that you want ot study, but you can't measure directly. Instead you can have a sample to infer something about the general population. This is called inferential statistics, opposite to descrictive statistics where the sample is the total population.
+
+HM
+
+- Compute the mean and the variance of the prevous HM. DEVn = DEVn-1 + (n-1)(Xn-1 - Xn)2+ (xn - Xn)2 = DEVn-1 + (xn - Xn-1)(xn - Xn)
+
+Lecture 3
+
+Combinazioni
+Coefficiente binomiale
+Processo di Bernoulli e Distribuzione binomiale
+The relative frequency convergers towards the probability (Law of large numbers)
+Central Limit theoreme
+
+Properties of the mean:
+sum(xi - mu) = 0
+it's called the gravity center of the data
+frequency of values xi greater than a certain "a" are less or equal than mu/a (Markov inequality)
+proof: n*mu = x1 + … + xn, if I replace all the values up to a certain a with a, I get a * freq(x Greater than a)
+
+HM
+
+- Create a continous time process starting from the previous hm:
+	divide time in n interval. for each interval we jump (0,1) with probability y/n. (poisson)
+- simplest proof that minimizes sum(xi -c)^2 when c = median.
+- research about different ways to define the average. (gravity center, distance, aggregation function, …) 
+
+
+Lecture 4
+
+Independence
+
+To make sense at least 2 variables are needed (bivariate or multivariate distributions). If we fix one of the variables we can produce a conditioned (to the fixed variable) distribution, that is a partition of the total distribution. Two varaibles are independent if the conditioned distribution of one character conditioned to the other are the same.
+All conditioned distributions are equal if the variables are independent: X | Y = yi --- Nij / N.j (f(X|Y) = yj) = Ni. / N (f(x=xi))
+
+HM
+
+- the jump is now 1/sqrt(n) or -1/sqrt(n) with probability p. It's the same of previous hm, but the jump is no longer 1. dy = sqrt(dt) * R (R = 1 or -1 depending on p). This is called the SCALING LIMIT of the random walk and it converges to a process called BROWNIAN MOTION or WEINER PROCESS.

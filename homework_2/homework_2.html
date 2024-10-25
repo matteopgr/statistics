@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Istogramma con Chart.js</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .inputs{
+            margin-bottom: 10px;
+        }
+        input{
+            margin: auto;
+        }
+        canvas {
+            border: 1px solid black;
+            height: 300px;
+            width: auto;
+        }
+        .container {
+            gap: 10px;
+            display: flex;
+            justify-content: start;
+            flex-wrap: wrap;
+        }
+        .errore {
+            color: red;
+            display: none; /* Nasconde inizialmente il messaggio */
+        }
+    </style>
+</head>
+<body>
+    <div class="inputs">
+        <label for="hackers">Hackers</label>
+        <input type="number" id="hackers" value="100">
+        <label for="servers">Servers</label>
+        <input type="number" id="servers" value="30">
+        <label for="probability">Probability</label>
+        <input type="number" id="probability" min="0" max="1" value="0.6" step="0.1">
+        <label for="time">Time</label>
+        <input type="number" name="time" id="time" value="30" onchange="checkTime();">
+        <button onclick="drawGraph();" id="start">Start</button>
+        <span id="messaggioErrore" class="errore">Error: Time must be lower than the number of servers!</span>
+    </div>
+    <div class="container">
+        <canvas id="canvas"></canvas>
+        <canvas id="canvas2"></canvas>
+        <canvas id="canvas3"></canvas>
+    </div>
+
+    <div class="avg" id="avg">Average: </div>
+    <div class="rel" id="rel">Relative Average: </div>
+
+    <script>
+
+        function checkTime(){
+            let time = Number(document.getElementById("time").value);
+            let servers = Number(document.getElementById("servers").value);
+            const messaggioErrore = document.getElementById("messaggioErrore");
+
+            if(time > servers){
+                document.getElementById("start").disabled = true;
+                messaggioErrore.style.display = "block";
+            } else{
+                document.getElementById("start").disabled = false;
+                messaggioErrore.style.display = "none";
+            }
+        }
+
+        function drawGraph(){
+
+            const canvas = document.getElementById("canvas");
+            const ctx = canvas.getContext("2d");
+
+            const histogram = document.getElementById("canvas2");
+            const hctx = histogram.getContext("2d");
+
+            const avg_graph = document.getElementById("canvas3");
+            const actx = avg_graph.getContext("2d");
+
+            let hackers = Number(document.getElementById("hackers").value);
+            let servers = Number(document.getElementById("servers").value);
+            let probability = Number(document.getElementById("probability").value);
+            let time = Number(document.getElementById("time").value);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hctx.clearRect(0, 0, histogram.width, histogram.height);
+            actx.clearRect(0, 0, avg_graph.width, avg_graph.height);
+
+            let hackers_scores = Array(hackers).fill(0);
+            let distribution = Array(servers + 1).fill(0);
+            let average = 0;
+            let rel_average = 0;
+            let variance = 0;
+
+            ctx.strokeStyle = "lightgray";
+            ctx.lineWidth = 1;
+
+            let width = canvas.width / servers;
+            let height = canvas.height / servers;
+
+            // drawing the grid
+            for(let x = 0; x < canvas.width; x += width){
+                ctx.beginPath();
+                ctx.moveTo(x, canvas.height);
+                ctx.lineTo(x, 0);
+                ctx.stroke();
+            }
+
+            for(let y = 0; y < canvas.height; y += height){
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            ctx.lineWidth = 2;
+
+            let step_x = canvas.width / servers;
+            let step_y = canvas.height / servers;
+            let step_a = avg_graph.width / hackers;
+            let a_x = 0;
+
+            // start the simulation
+            for(let h = 0; h < hackers; h++){
+
+                let x = 0;
+                let y = canvas.height;
+
+                // Randome color for each hacker
+                let randomColor = `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`;
+                ctx.strokeStyle = randomColor;
+
+                for(let s = 0; s < time; s++){
+                    let n = Math.random();
+
+                    if (n <= probability){
+                        ctx.beginPath();
+                        ctx.moveTo(x, y);
+                        y -= step_y;
+                        ctx.lineTo(x, y);
+                        ctx.stroke();
+                        hackers_scores[h]++;
+                    }
+
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    x += step_x;
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                }
+
+                actx.beginPath();
+                actx.moveTo(a_x,avg_graph.height - average);
+
+                let delta = hackers_scores[h] - average; 
+                average += delta / (h + 1);
+                rel_average = average / servers;
+
+                a_x += step_a;
+                actx.lineTo(a_x,avg_graph.height - average);
+                actx.stroke();
+
+                distribution[hackers_scores[h]]++;
+            }
+            hctx.fillStyle = "rgba(211, 211, 211, 0.1)";
+            hctx.lineWidth = 1;
+
+            let hwidth = histogram.width / (servers + 1);
+
+            let max = Math.max(...distribution);
+            let scale = Math.floor(histogram.height / max);
+
+            for(let s = 0; s <= servers; s++){
+                hctx.fillStyle = "green";
+                hctx.fillRect(hwidth * s, histogram.height - distribution[s] * scale, hwidth, distribution[s] * scale);
+                hctx.strokeStyle = "black";
+                hctx.strokeRect(hwidth * s, histogram.height - distribution[s] * scale, hwidth, distribution[s] * scale);
+            }
+
+            const avg = document.getElementById("avg");
+            avg.innerHTML = `Average: ${average}`;
+            const rel = document.getElementById("rel");
+            rel.innerHTML = `Relative average: ${rel_average}`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homework 2</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .inputs{
+            margin-bottom: 10px;
+        }
+        input{
+            margin: auto;
+        }
+        canvas {
+            width: 1000px;
+            max-width: 1000px;
+            margin: 20px auto;
+        }
+        .container {
+            margin-bottom: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+        .errore {
+            color: red;
+            display: none;
+        }
+        .stats{
+            display: flex;
+            justify-content: space-around;
+        }
+    </style>
+</head>
+<body>
+    <div class="inputs">
+        <label for="hackers">Hackers</label>
+        <input type="number" id="hackers" value="10">
+        <label for="servers">Servers</label>
+        <input type="number" id="servers" value="10" onchange="checkTime();">
+        <label for="probability">Probability</label>
+        <input type="number" id="probability" min="0" max="1" value="0.5" step="0.1">
+        <label for="time">Time</label>
+        <input type="number" id="time" value="5" onchange="checkTime();">
+        <button id="start" onclick="drawGraph();">Start</button>
+        <span id="messaggioErrore" class="errore">Error: Time must be lower than the number of servers!</span>
+    </div>
+    <div class="container">
+        <canvas id="penetrationChart"></canvas>
+        <canvas id="averageChart"></canvas>
+        <canvas id="distributionChart"></canvas>
+        <canvas id="timedDistributionChart"></canvas>
+    </div>
+
+    <div class="stats">
+        <div id="mean">The final mean is: </div>
+        <div id="timedMean">The mean at time t is: </div>
+        <div id="variance">The final variance is: </div>
+        <div id="timedVariance">The variance at time t is: </div>
+    </div>
+
+    <script>
+
+        function checkTime(){
+            let time = parseInt(document.getElementById("time").value);
+            let servers = parseInt(document.getElementById("servers").value);
+            const messaggioErrore = document.getElementById("messaggioErrore");
+
+            if(time > servers){
+                document.getElementById("start").disabled = true;
+                messaggioErrore.style.display = "block";
+            } else{
+                document.getElementById("start").disabled = false;
+                messaggioErrore.style.display = "none";
+            }
+        }
+
+        let penetrationChartInstance = null;
+        let distributionChartInstance = null;
+        let timedDistributionChartInstance = null;
+        let averageChartInstance = null;
+
+        function simulatePenetrations(s, h, p) {
+            let results = [];
+            for (let hacker = 0; hacker < h; hacker++) {
+                let hackerPenetration = [];
+                let cumulativePenetration = 0;
+                for (let server = 0; server < s; server++) {
+                    let n = Math.random();
+                    let penetrated = n <= p ? 1 : -1;
+                    cumulativePenetration += penetrated;
+                    hackerPenetration.push(cumulativePenetration);
+                }
+                results.push({ hacker: hacker + 1, 
+                    penetrations: hackerPenetration, 
+                    score : cumulativePenetration });
+            }
+            return results;
+        }
+
+        function createPenetrationChart(data) {
+            const ctx = document.getElementById('penetrationChart').getContext('2d');
+            const labels = Array.from({ length: data[0].penetrations.length }, (_, i) => `Server ${i + 1}`);
+
+            if (penetrationChartInstance) {
+                penetrationChartInstance.destroy();
+            }
+
+            const datasets = data.map((hackerData, index) => {
+                return {
+                    label: `Hacker ${hackerData.hacker}`,
+                    data: hackerData.penetrations,
+                    borderColor: getRandomColor(),
+                    fill: false,
+                    stepped: true
+                };
+            });
+
+            penetrationChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Penetrazioni Cumulative dei Server per Hacker'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            min: -data[0].penetrations.length,
+                            max: data[0].penetrations.length,
+                            title: {
+                                display: true,
+                                text: 'Server Penetrati'
+                            },
+                            ticks: {
+                                stepSize: 1,
+                                max: data[0].penetrations.length
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createDistributionChart(data) {
+            const ctx = document.getElementById('distributionChart').getContext('2d');
+            const maxRange = data[0].penetrations.length;
+            const distribution = Array.from({ length: (maxRange * 2) + 1 }, () => 0);
+
+            data.forEach(hackerData => {
+                const finalScore = hackerData.score;
+                const index = finalScore + maxRange;
+                distribution[index]++;
+            });
+
+            const labels = Array.from({ length: (maxRange * 2) + 1 }, (_, i) => `${i - maxRange}`);
+
+            if (distributionChartInstance) {
+                distributionChartInstance.destroy();
+            }
+
+            distributionChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'penetration frequency',
+                        data: distribution,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Frequency chart'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createTimedDistributionChart(data, t) {
+            const ctx = document.getElementById('timedDistributionChart').getContext('2d');
+            const servers = data[0].penetrations.length;
+            const distribution = Array.from({ length: (servers * 2) + 1 }, () => 0);
+
+            data.forEach(hackerData => {
+                let score = hackerData.penetrations[t - 1];
+                distribution[score + servers]++;
+            });
+
+            const labels = Array.from({ length: (servers * 2) + 1 }, (_, i) => `${i - servers}`);
+
+            if (timedDistributionChartInstance) {
+                timedDistributionChartInstance.destroy();
+            }
+
+            timedDistributionChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Frequency at time t',
+                        data: distribution,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Frequency chart at time t'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createAverageChart(data){
+            const ctx = document.getElementById('averageChart').getContext('2d');
+            const servers = data[0].penetrations.length;
+            const hackers = data.length;
+            const averages = Array(servers).fill(0);
+            const frequency = Array(servers).fill(0);
+            const relativeFrequency = Array(servers).fill(0);
+            const variances = Array(servers).fill(0);
+            let M2 = 0;
+
+            for(let s = 0; s < servers; s++){
+                let penetrations = 0;
+                for(let hackerData of data){
+                    if(s == 0){
+                        penetrations += hackerData.penetrations[s];    
+                    } else{
+                        penetrations += hackerData.penetrations[s] - hackerData.penetrations[s-1];
+                    }
+                }
+                if(s == 0){
+                    averages[s] = penetrations;
+                    frequency[s] = penetrations;
+                } else{
+                    frequency[s] = frequency[s-1]+penetrations;
+                    let delta = penetrations - averages[s-1];
+                    averages[s] = averages[s-1] + delta / (s + 1);
+                    let delta2 = penetrations - averages[s];
+                    M2 += delta * delta2;
+                    let variance = M2 / (s);
+                    variances[s] = variance;
+                }
+                relativeFrequency[s] = frequency[s] / ((s + 1) * hackers);
+            }
+
+            if (averageChartInstance) {
+                averageChartInstance.destroy();
+            }
+
+            const labels = Array.from({ length: servers }, (_, i) => `Server ${i + 1}`);
+
+            averageChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Running Mean',
+                        data: averages,
+                        borderColor: 'red',
+                        fill: false,
+                        tension: 0.4,
+                        stepped: false
+                    },{
+                        label: 'Absolute frequency',
+                        data: frequency,
+                        borderColor: 'green',
+                        fill: false,
+                        tension: 0.4,
+                        stepped: false
+                    },{
+                        label: 'Relative frequency',
+                        data: relativeFrequency,
+                        borderColor: 'purple',
+                        fill: false,
+                        tension: 0.4,
+                        stepped: false
+                    },{
+                        label: 'Variance',
+                        data: variances,
+                        borderColor: 'yellow',
+                        fill: false,
+                        tension: 0.4,
+                        stepped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Average Penetrations'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function getRandomColor() {
+            const r = Math.floor(Math.random() * 255);
+            const g = Math.floor(Math.random() * 255);
+            const b = Math.floor(Math.random() * 255);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function mean(data){
+            const n = data[0].penetrations.length;
+
+            let mean = 0;
+
+            for(let i = 0; i < n; i++){
+                let sum = 0;
+                for(let j of data){
+                    if(i == 0){
+                        sum += j.penetrations[i];    
+                    } else{
+                        sum += j.penetrations[i] - j.penetrations[i-1];
+                    }
+                }
+                let delta = sum - mean;
+                mean += delta / (i + 1);
+            }
+            return mean;
+        }
+
+        function timedMean(data, t){
+
+            let mean = 0;
+
+            for(let i = 0; i < t; i++){
+                let sum = 0;
+                for(let j of data){
+                    if(i == 0){
+                        sum += j.penetrations[i];    
+                    } else{
+                        sum += j.penetrations[i] - j.penetrations[i-1];
+                    }
+                }
+                let delta = sum - mean;
+                mean += delta / (i + 1);
+            }
+            return mean;
+        }
+
+        function variance(data){
+            const n = data[0].penetrations.length;
+
+            let mean = 0;
+            let variance = 0;
+            let M2 = 0;
+
+            for(let i = 0; i < n; i++){
+                let sum = 0;
+                for(let j of data){
+                    if(i == 0){
+                        sum += j.penetrations[i];    
+                    } else{
+                        sum += j.penetrations[i] - j.penetrations[i-1];
+                    }
+                }
+                let delta = sum - mean;
+                mean += delta / (i + 1);
+                let delta2 = sum - mean;
+                M2 += delta * delta2;
+                variance = (i < 1)? 0 : M2 / (i);
+            }
+            return variance;
+        }
+
+        function timedVariance(data, t){
+
+            let mean = 0;
+            let variance = 0;
+            let M2 = 0;
+
+            for(let i = 0; i < t; i++){
+                let sum = 0;
+                for(let j of data){
+                    if(i == 0){
+                        sum += j.penetrations[i];    
+                    } else{
+                        sum += j.penetrations[i] - j.penetrations[i-1];
+                    }
+                }
+                let delta = sum - mean;
+                mean += delta / (i + 1);
+                let delta2 = sum - mean;
+                M2 += delta * delta2;
+                variance = (i < 1)? 0 : M2 / (i);
+            }
+            return variance;
+        }
+
+        function drawGraph(){
+
+            const s = parseInt(document.getElementById("servers").value);
+            const h = parseInt(document.getElementById("hackers").value);
+            const p = parseFloat(document.getElementById("probability").value);
+            const t = parseInt(document.getElementById("time").value);
+            
+
+            // Simulazione
+            const simulationResults = simulatePenetrations(s, h, p);
+
+            let m = mean(simulationResults);
+            let t_mean = timedMean(simulationResults, t);
+            let v = variance(simulationResults);
+            let t_var = timedVariance(simulationResults, t);
+
+            document.getElementById("mean").innerHTML = "The final mean is: " + m.toString();
+            document.getElementById("timedMean").innerHTML = "The mean at time t is: " + t_mean.toString();
+            document.getElementById("variance").innerHTML = "The final varinace is: " + v.toString();
+            document.getElementById("timedVariance").innerHTML = "The variance at time t is: " + t_var.toString();
+
+            // Crea il grafico di penetrazioni (linee)
+            createPenetrationChart(simulationResults);
+
+            // Crea il grafico di distribuzione (istogramma)
+            createDistributionChart(simulationResults);
+
+            createTimedDistributionChart(simulationResults ,t);
+            
+            createAverageChart(simulationResults);
+        }
+
+        window.onload = function(){
+            drawGraph();
+        };
+
+        
+    </script>
+</body>
+</html>
