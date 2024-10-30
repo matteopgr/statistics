@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Istogramma con Chart.js</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .inputs{
+            display: flex;
+            justify-content: center;
+        }
+        label{
+            font-family: 'Lato', sans-serif;
+            font-size: 11pt;
+            margin-right: 5px;
+            margin-left: 5px;
+        }
+        canvas {
+            width: 1000px;
+            max-width: 1000px;
+            margin: 20px auto;
+        }
+        .container {
+            margin-bottom: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+        .errore {
+            color: red;
+            display: none;
+            text-align: center;
+        }
+        .stats{
+            display: flex;
+            justify-content: space-evenly;
+            font-family: 'Lato', sans-serif;
+            font-size: 11pt;
+        }
+    </style>
+</head>
+<body>
+    <div class="inputs">
+        <label for="hackers">Hackers (m)</label>
+        <input type="number" id="hackers" value="20" min="0">
+        <label for="servers">Servers (n)</label>
+        <input type="number" id="servers" value="200" min="0" onchange="checkLambda();">
+        <label for="probability">Lambda</label>
+        <input type="number" id="lambda" min="0" value="20" onchange="checkLambda();">
+        <button id="start" onclick="drawGraph();">Start</button>
+    </div>
+    <span id="messaggioErrore" class="errore">Error: Lambda must be lower than n!</span>
+    <div class="container">
+        <canvas id="penetrationChart"></canvas>
+        <canvas id="distributionChart"></canvas>
+        <canvas id="averageChart"></canvas>
+    </div>
+
+    <div class="stats">
+        <div id="mean">The final mean is: </div>
+        <div id="variance">The final variance is: </div>
+    </div>
+
+    <script>
+
+        let penetrationChartInstance = null;
+        let distributionChartInstance = null;
+        let averageChartInstance = null;
+
+        function simulatePenetrations(n, m, p) {
+            let results = [];
+            for (let hacker = 0; hacker < m; hacker++) {
+                let hackerPenetration = [];
+                let cumulativePenetration = 0;
+                for (let server = 0; server < n; server++) {
+                    let n = Math.random();
+                    let penetrated = n <= p ? 1 : 0;
+                    cumulativePenetration += penetrated;
+                    hackerPenetration.push(cumulativePenetration);
+                }
+                results.push({ hacker: hacker + 1, penetrations: hackerPenetration, score : cumulativePenetration });
+            }
+            return results;
+        }
+
+        function createPenetrationChart(data) {
+            const ctx = document.getElementById('penetrationChart').getContext('2d');
+            const labels = Array.from({ length: data[0].penetrations.length }, (_, i) => `Server ${i + 1}`);
+
+            if (penetrationChartInstance) {
+                penetrationChartInstance.destroy();
+            }
+
+            const datasets = data.map((hackerData, index) => {
+                return {
+                    label: `Hacker ${hackerData.hacker}`,
+                    data: hackerData.penetrations,
+                    borderColor: getRandomColor(),
+                    fill: false,
+                    stepped: true
+                };
+            });
+
+            penetrationChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Penetration chart'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Penetrations'
+                            },
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createDistributionChart(data) {
+            const ctx = document.getElementById('distributionChart').getContext('2d');
+            const distribution = Array.from({ length: data[0].penetrations.length + 1 }, () => 0);
+            data.forEach(hackerData => {
+                const totalSuccesses = hackerData.score;
+                distribution[totalSuccesses]++;
+            });
+
+            const labels = Array.from({ length: data[0].penetrations.length + 1 }, (_, i) => `${i}`);
+
+            if (distributionChartInstance) {
+                distributionChartInstance.destroy();
+            }
+
+            distributionChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Number of hackers',
+                        data: distribution,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Penetration Frequency chart'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createAverageChart(data){
+            const ctx = document.getElementById('averageChart').getContext('2d');
+            const servers = data[0].penetrations.length;
+            const hackers = data.length;
+            const averages = Array(servers).fill(0);
+            const variances = Array(servers).fill(0);
+            let M2 = 0;
+
+            for(let s = 0; s < servers; s++){
+                let penetrations = 0;
+                for(let hackerData of data){
+                    if(s == 0){
+                        penetrations += hackerData.penetrations[s];    
+                    } else{
+                        penetrations += hackerData.penetrations[s] - hackerData.penetrations[s-1];
+                    }
+                }
+                if(s == 0){
+                    averages[s] = penetrations;
+                } else{
+                    let delta = penetrations - averages[s-1];
+                    averages[s] = averages[s-1] + delta / (s + 1);
+                    let delta2 = penetrations - averages[s];
+                    M2 += delta * delta2;
+                    let variance = M2 / (s);
+                    variances[s] = variance;
+                }
+            }
+
+            if (averageChartInstance) {
+                averageChartInstance.destroy();
+            }
+
+            const labels = Array.from({ length: servers }, (_, i) => `Server ${i + 1}`);
+
+            averageChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Running Mean',
+                        data: averages,
+                        borderColor: 'red',
+                        fill: false,
+                        tension: 0.4,
+                        stepped: false
+                    },{
+                        label: 'Variance',
+                        data: variances,
+                        borderColor: 'yellow',
+                        fill: false,
+                        tension: 0.4,
+                        stepped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Average and Variance Chart'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function mean(data){
+            const n = data[0].penetrations.length;
+
+            let mean = 0;
+
+            for(let i = 0; i < n; i++){
+                let sum = 0;
+                for(let j of data){
+                    if(i == 0){
+                        sum += j.penetrations[i];    
+                    } else{
+                        sum += j.penetrations[i] - j.penetrations[i-1];
+                    }
+                }
+                let delta = sum - mean;
+                mean += delta / (i + 1);
+            }
+            return mean;
+        }
+
+        function variance(data){
+            const n = data[0].penetrations.length;
+
+            let mean = 0;
+            let variance = 0;
+            let M2 = 0;
+
+            for(let i = 0; i < n; i++){
+                let sum = 0;
+                for(let j of data){
+                    if(i == 0){
+                        sum += j.penetrations[i];    
+                    } else{
+                        sum += j.penetrations[i] - j.penetrations[i-1];
+                    }
+                }
+                let delta = sum - mean;
+                mean += delta / (i + 1);
+                let delta2 = sum - mean;
+                M2 += delta * delta2;
+                variance = (i < 1)? 0 : M2 / (i);
+            }
+            return variance;
+        }
+
+        function getRandomColor() {
+            const r = Math.floor(Math.random() * 255);
+            const g = Math.floor(Math.random() * 255);
+            const b = Math.floor(Math.random() * 255);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function drawGraph(){
+
+            const n = parseInt(document.getElementById("servers").value);
+            const m = parseInt(document.getElementById("hackers").value);
+            const l = parseFloat(document.getElementById("lambda").value);
+
+            const p = l / n;
+
+            const simulationResults = simulatePenetrations(n, m, p);
+
+            let avg = mean(simulationResults);
+            let v = variance(simulationResults);
+
+            document.getElementById("mean").innerHTML = "The final mean is: " + avg.toString();
+            document.getElementById("variance").innerHTML = "The final varinace is: " + v.toString();
+
+            createPenetrationChart(simulationResults);
+
+            createDistributionChart(simulationResults);  
+
+            createAverageChart(simulationResults)
+        }
+
+        function checkLambda(){
+            const n = parseInt(document.getElementById("servers").value);
+            const l = parseInt(document.getElementById("lambda").value); 
+            const messaggioErrore = document.getElementById("messaggioErrore");
+
+            if(l > n){
+                document.getElementById("start").disabled = true;
+                messaggioErrore.style.display = "block";
+            } else{
+                document.getElementById("start").disabled = false;
+                messaggioErrore.style.display = "none";
+            }
+        }
+
+        window.onload = function(){
+            drawGraph();
+        };
+        
+    </script>
+</body>
+</html>

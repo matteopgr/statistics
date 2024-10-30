@@ -7,10 +7,14 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .inputs{
-            margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
         }
-        input{
-            margin: auto;
+        label{
+            font-family: 'Lato', sans-serif;
+            font-size: 11pt;
+            margin-right: 5px;
+            margin-left: 5px;
         }
         canvas {
             width: 1000px;
@@ -26,10 +30,13 @@
         .errore {
             color: red;
             display: none;
+            text-align: center;
         }
         .stats{
             display: flex;
-            justify-content: space-around;
+            justify-content: space-evenly;
+            font-family: 'Lato', sans-serif;
+            font-size: 11pt;
         }
     </style>
 </head>
@@ -44,8 +51,8 @@
         <label for="time">Time</label>
         <input type="number" id="time" value="5" onchange="checkTime();">
         <button id="start" onclick="drawGraph();">Start</button>
-        <span id="messaggioErrore" class="errore">Error: Time must be lower than the number of servers!</span>
     </div>
+    <span id="messaggioErrore" class="errore">Error: Time must be lower than the number of servers!</span>
     <div class="container">
         <canvas id="penetrationChart"></canvas>
         <canvas id="averageChart"></canvas>

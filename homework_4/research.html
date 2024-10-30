@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistical independence</title>
+    <!-- Includi la libreria MathJax -->
+    <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+
+    <!-- Imposta lo stile per il font Lato e la dimensione -->
+    <style>
+        body {
+            margin: 10;
+            padding: 0;
+            font-family: 'Lato', sans-serif;
+        }
+        p {
+            font-size: 11pt;
+        }
+        h1 {
+            font-family: 'Lato', sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+
+    <p>Statistical independence is a crucial concept in probability theory, particularly when discussing sample variables. When we say that two sample variables are independent, it means that the occurrence or value of one variable does not influence the other.</p>
+    
+    <h2>Definition of Independence for Sample Variables</h2>
+    
+    <p>Let \( X \) and \( Y \) be two sample variables. They are said to be independent if the joint distribution of these variables equals the product of their individual distributions.</p>
+    
+    <h3>Formal Definition:</h3>
+    <p>
+        \[
+        P(X = x, Y = y) = P(X = x) \cdot P(Y = y)
+        \]
+    </p>
+    <p>This equation states that the probability of both \( X \) and \( Y \) taking specific values \( x \) and \( y \) is equal to the product of their individual probabilities.</p>
+    
+    <h2>Analogies with Formal Definitions in Probability Theory</h2>
+    
+    <h3>1. Discrete Events:</h3>
+    <p>Consider two discrete events \( A \) and \( B \). They are independent if:</p>
+    <p>
+        \[
+        P(A \cap B) = P(A) \cdot P(B)
+        \]
+    </p>
+    <p>This is analogous to the definition for sample variables, where the joint probability of events matches the product of their individual probabilities.</p>
+    
+    <h3>2. Coin Tossing Example:</h3>
+    <p>Imagine tossing two coins. Let \( A \) be the event that the first coin lands on heads and \( B \) that the second coin lands on heads.</p>
+    <ul>
+        <li><strong>Probabilities:</strong>
+            <ul>
+                <li>\( P(A) = \frac{1}{2} \)</li>
+                <li>\( P(B) = \frac{1}{2} \)</li>
+                <li>The joint probability \( P(A \cap B) = P(\text{both heads}) = \frac{1}{4} \)</li>
+            </ul>
+        </li>
+    </ul>
+    <p>Here, we see that \( P(A \cap B) = P(A) \cdot P(B) \), confirming that the two events are independent.</p>
+    
+    <h3>3. Rolling Dice:</h3>
+    <p>When rolling two dice, let \( X \) be the outcome of the first die and \( Y \) the outcome of the second die.</p>
+    <ul>
+        <li><strong>Independence:</strong>
+            <ul>
+                <li>\( P(X = 3) = \frac{1}{6} \)</li>
+                <li>\( P(Y = 5) = \frac{1}{6} \)</li>
+                <li>The joint probability \( P(X = 3, Y = 5) = P(X = 3) \cdot P(Y = 5) = \frac{1}{36} \)</li>
+            </ul>
+        </li>
+    </ul>
+    <p>This illustrates the independence of the two sample variables.</p>
+    
+    <h2>Visual Representation</h2>
+    
+    <h3>Venn Diagrams:</h3>
+    <p>In a Venn diagram representing independent events, the circles for \( A \) and \( B \) do not overlap. The area representing \( A \cap B \) can be viewed as the product of the areas of the two circles.</p>
+    
+    <h3>Joint Probability Distribution:</h3>
+    <p>For independent sample variables, the joint probability distribution can be depicted in a grid format, where each cell \( (x, y) \) shows \( P(X = x, Y = y) \). The structure emphasizes that the joint probabilities arise from multiplying individual probabilities.</p>
+   
+</body>
+</html>
