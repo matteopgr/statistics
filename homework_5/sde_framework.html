@@ -50,7 +50,7 @@
             <label for="lambda">Lambda</label>
             <input type="number" id="lambda" min="0" value="30" onchange="checkLambda();">
             <button id="start" onclick="drawGraph();">Start</button>
-            <select name="framework" id="fw" onchange="drawGraph();">
+            <select name="framework" id="fw" onchange="checkFramework(); drawGraph();">
                 <option value="discrete random jump">Discrete Random Jump</option>
                 <option value="discrete random walk">Discrete Random Walk</option>
                 <option value="continous random jump">Continous Random Jump</option>
@@ -103,6 +103,21 @@
                 document.getElementById("framework").innerHTML = continous_random_walk;
             }
         }
+
+        function checkTime(){
+            let time = parseInt(document.getElementById("time").value);
+            let servers = parseInt(document.getElementById("servers").value);
+            const messaggioErrore = document.getElementById("messaggioErrore");
+
+            if(time > servers){
+                document.getElementById("start").disabled = true;
+                messaggioErrore.style.display = "block";
+            } else{
+                document.getElementById("start").disabled = false;
+                messaggioErrore.style.display = "none";
+            }
+        }
+        
         let penetrationChartInstance = null;
         let distributionChartInstance = null;
         let timedDistributionChartInstance = null;
@@ -536,8 +551,6 @@
 
         function drawGraph(){
 
-            checkFramework();
-
             let n = null;
             let m = null;
             let p = null;
@@ -613,7 +626,7 @@
                 <label for="probability">Probability</label>
                 <input type="number" id="probability" min="0" max="1" value="0.5" step="0.1">
                 <button onclick="drawGraph();">Start</button>
-                <select name="framework" id="fw" onchange="drawGraph();">
+                <select name="framework" id="fw" onchange="checkFramework(); drawGraph();">
                     <option value="discrete random jump" selected>Discrete Random Jump</option>
                     <option value="discrete random walk">Discrete Random Walk</option>
                     <option value="continous random jump">Continous Random Jump</option>
@@ -636,7 +649,7 @@
                 <label for="time">Time</label>
                 <input type="number" id="time" value="5" onchange="checkTime();">
                 <button id="start" onclick="drawGraph();">Start</button>
-                <select name="framework" id="fw" onchange="drawGraph();">
+                <select name="framework" id="fw" onchange="checkFramework(); drawGraph();">
                     <option value="discrete random jump">Discrete Random Jump</option>
                     <option value="discrete random walk" selected>Discrete Random Walk</option>
                     <option value="continous random jump">Continous Random Jump</option>
@@ -666,7 +679,7 @@
                 <label for="probability">Lambda</label>
                 <input type="number" id="lambda" min="0" value="20" onchange="checkLambda();">
                 <button id="start" onclick="drawGraph();">Start</button>
-                <select name="framework" id="fw" onchange="drawGraph();">
+                <select name="framework" id="fw" onchange="checkFramework(); drawGraph();">
                     <option value="discrete random jump">Discrete Random Jump</option>
                     <option value="discrete random walk">Discrete Random Walk</option>
                     <option value="continous random jump" selected>Continous Random Jump</option>
@@ -694,7 +707,7 @@
                 <label for="lambda">Lambda</label>
                 <input type="number" id="lambda" min="0" value="30" onchange="checkLambda();">
                 <button id="start" onclick="drawGraph();">Start</button>
-                <select name="framework" id="fw" onchange="drawGraph();">
+                <select name="framework" id="fw" onchange="checkFramework(); drawGraph();">
                     <option value="discrete random jump">Discrete Random Jump</option>
                     <option value="discrete random walk">Discrete Random Walk</option>
                     <option value="continous random jump">Continous Random Jump</option>
