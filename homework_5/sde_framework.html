@@ -379,7 +379,7 @@
             });
         }
 
-        function createAverageChart(data){
+        function createDiscreteAverageChart(data){
             const ctx = document.getElementById('averageChart').getContext('2d');
             const servers = data[0].penetrations.length;
             const hackers = data.length;
@@ -454,6 +454,81 @@
             });
         }
 
+        function createContinousAverageChart(data){
+            const ctx = document.getElementById('averageChart').getContext('2d');
+            const servers = data[0].scores.length;
+            const hackers = data.length;
+            const averages = Array(servers).fill(0);
+            const variances = Array(servers).fill(0);
+            let M2 = 0;
+
+            for(let s = 0; s < servers; s++){
+                let penetrations = 0;
+                for(let hackerData of data){
+                    if(s == 0){
+                        penetrations += hackerData.scores[s];    
+                    } else{
+                        penetrations += hackerData.scores[s] - hackerData.scores[s-1];
+                    }
+                }
+                if(s == 0){
+                    averages[s] = penetrations;
+                } else{
+                    let delta = penetrations - averages[s-1];
+                    averages[s] = averages[s-1] + delta / (s + 1);
+                    let delta2 = penetrations - averages[s];
+                    M2 += delta * delta2;
+                    let variance = M2 / (s);
+                    variances[s] = variance;
+                }
+            }
+
+            if (averageChartInstance) {
+                averageChartInstance.destroy();
+            }
+
+            const labels = Array.from({ length: servers }, (_, i) => `Server ${i + 1}`);
+
+            averageChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Running Mean',
+                        data: averages,
+                        borderColor: 'red',
+                        fill: false,
+                        tension: 0.4,
+                        stepped: false
+                    },{
+                        label: 'Variance',
+                        data: variances,
+                        borderColor: 'yellow',
+                        fill: false,
+                        tension: 0.4,
+                        stepped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Average Penetrations'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
         function getRandomColor() {
             const r = Math.floor(Math.random() * 255);
             const g = Math.floor(Math.random() * 255);
@@ -461,7 +536,7 @@
             return `rgb(${r}, ${g}, ${b})`;
         }
 
-        function mean(data){
+        function discreteMean(data){
             const n = data[0].penetrations.length;
 
             let mean = 0;
@@ -473,6 +548,26 @@
                         sum += j.penetrations[i];    
                     } else{
                         sum += j.penetrations[i] - j.penetrations[i-1];
+                    }
+                }
+                let delta = sum - mean;
+                mean += delta / (i + 1);
+            }
+            return mean;
+        }
+
+        function continousMean(data){
+            const n = data[0].penetrations.length;
+
+            let mean = 0;
+
+            for(let i = 0; i < n; i++){
+                let sum = 0;
+                for(let j of data){
+                    if(i == 0){
+                        sum += j.scores[i];    
+                    } else{
+                        sum += j.scores[i] - j.scores[i-1];
                     }
                 }
                 let delta = sum - mean;
@@ -500,7 +595,7 @@
             return mean;
         }
 
-        function variance(data){
+        function discreteVariance(data){
             const n = data[0].penetrations.length;
 
             let mean = 0;
@@ -514,6 +609,31 @@
                         sum += j.penetrations[i];    
                     } else{
                         sum += j.penetrations[i] - j.penetrations[i-1];
+                    }
+                }
+                let delta = sum - mean;
+                mean += delta / (i + 1);
+                let delta2 = sum - mean;
+                M2 += delta * delta2;
+                variance = (i < 1)? 0 : M2 / (i);
+            }
+            return variance;
+        }
+
+        function continousVariance(data){
+            const n = data[0].penetrations.length;
+
+            let mean = 0;
+            let variance = 0;
+            let M2 = 0;
+
+            for(let i = 0; i < n; i++){
+                let sum = 0;
+                for(let j of data){
+                    if(i == 0){
+                        sum += j.scores[i];    
+                    } else{
+                        sum += j.scores[i] - j.scores[i-1];
                     }
                 }
                 let delta = sum - mean;
@@ -575,14 +695,14 @@
                 simulationResults = simulateDiscretePenetrations(n, m, p);
 
                 createDiscretePenetrationChart(simulationResults);
-                
-                createAverageChart(simulationResults);
+
+                createDiscreteAverageChart(simulationResults);
 
                 createTimedDistributionChart(simulationResults, t);
 
-                let avg = mean(simulationResults);
+                let avg = discreteMean(simulationResults);
                 let t_avg = timedMean(simulationResults, t);
-                let v = variance(simulationResults);
+                let v = discreteVariance(simulationResults);
                 let t_var = timedVariance(simulationResults, t);
 
                 document.getElementById("mean").innerHTML = "The final mean is: " + avg.toString();
@@ -598,21 +718,22 @@
 
                 simulationResults = simulateContinousPenetrations(n, m, p);
 
-                let avg = mean(simulationResults);
-                let v = variance(simulationResults);
+                let avg = continousMean(simulationResults);
+                let v = continousVariance(simulationResults);
 
                 document.getElementById("mean").innerHTML = "The final mean is: " + avg.toString();
                 document.getElementById("variance").innerHTML = "The final varinace is: " + v.toString();
 
                 createContinousPenetrationChart(simulationResults);
                 
-                createAverageChart(simulationResults);
+                createContinousAverageChart(simulationResults);
             }
 
             createDistributionChart(simulationResults);
         }
 
         window.onload = function(){
+            checkFramework();
             drawGraph();
         };
 

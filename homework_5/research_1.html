@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistical independence</title>
+    <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <style>
+        body {
+            margin: 10;
+            padding: 0;
+            font-family: 'Lato', sans-serif;
+        }
+        p {
+            font-size: 11pt;
+        }
+        h1, h2 {
+            color: #0b5394;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Proof of the Cauchy-Schwarz Inequality</h2>
+
+    <p>Let <b>&#x1D451;</b> and <b>&#x1D453;</b> be vectors in \( \mathbb{R}^n \). The Cauchy-Schwarz inequality states that:</p>
+    <p>
+    \[
+    |\mathbf{a} \cdot \mathbf{b}| \leq \|\mathbf{a}\| \|\mathbf{b}\|,
+    \]
+    </p>
+    <p>where \( \mathbf{a} \cdot \mathbf{b} \) is the dot product of \( \mathbf{a} \) and \( \mathbf{b} \), and \( \|\mathbf{a}\| \) and \( \|\mathbf{b}\| \) are their magnitudes, given by \( \|\mathbf{a}\| = \sqrt{\mathbf{a} \cdot \mathbf{a}} \) and \( \|\mathbf{b}\| = \sqrt{\mathbf{b} \cdot \mathbf{b}} \).</p>
+    
+    <h3>Step-by-Step Proof</h3>
+    
+    <ol>
+        <li>
+            <p>Define a new vector involving a scalar \( t \):</p>
+            <p>
+            \[
+            \|\mathbf{a} - t \mathbf{b}\|^2 \geq 0,
+            \]
+            </p>
+            <p>since the norm (or squared magnitude) of any vector is always non-negative.</p>
+        </li>
+        
+        <li>
+            <p>Expand the norm squared:</p>
+            <p>
+            \[
+            \|\mathbf{a} - t \mathbf{b}\|^2 = (\mathbf{a} - t \mathbf{b}) \cdot (\mathbf{a} - t \mathbf{b}).
+            \]
+            </p>
+            <p>Using the distributive property of the dot product, this expands to</p>
+            <p>
+            \[
+            = \mathbf{a} \cdot \mathbf{a} - 2t (\mathbf{a} \cdot \mathbf{b}) + t^2 (\mathbf{b} \cdot \mathbf{b}).
+            \]
+            </p>
+            <p>which simplifies to</p>
+            <p>
+            \[
+            = \|\mathbf{a}\|^2 - 2t (\mathbf{a} \cdot \mathbf{b}) + t^2 \|\mathbf{b}\|^2.
+            \]
+            </p>
+        </li>
+        
+        <li>
+            <p>Consider this expression as a function of \( t \):</p>
+            <p>Define</p>
+            <p>
+            \[
+            f(t) = \|\mathbf{a}\|^2 - 2t (\mathbf{a} \cdot \mathbf{b}) + t^2 \|\mathbf{b}\|^2.
+            \]
+            </p>
+            <p>Since \( \|\mathbf{a} - t \mathbf{b}\|^2 \geq 0 \), it follows that \( f(t) \geq 0 \) for all real \( t \).</p>
+        </li>
+        
+        <li>
+            <p>Find the minimum of \( f(t) \):</p>
+            <p>Since \( f(t) \) is a quadratic function in \( t \), it reaches its minimum where the derivative with respect to \( t \) is zero. Differentiate \( f(t) \) with respect to \( t \):</p>
+            <p>
+            \[
+            f'(t) = -2 (\mathbf{a} \cdot \mathbf{b}) + 2t \|\mathbf{b}\|^2.
+            \]
+            </p>
+            <p>Setting \( f'(t) = 0 \), we find</p>
+            <p>
+            \[
+            t = \frac{\mathbf{a} \cdot \mathbf{b}}{\|\mathbf{b}\|^2}.
+            \]
+            </p>
+        </li>
+        
+        <li>
+            <p>Substitute \( t \) back into \( f(t) \):</p>
+            <p>Substitute \( t = \frac{\mathbf{a} \cdot \mathbf{b}}{\|\mathbf{b}\|^2} \) into \( f(t) \):</p>
+            <p>
+            \[
+            f\left(\frac{\mathbf{a} \cdot \mathbf{b}}{\|\mathbf{b}\|^2}\right) = \|\mathbf{a}\|^2 - 2 \frac{(\mathbf{a} \cdot \mathbf{b})^2}{\|\mathbf{b}\|^2} + \frac{(\mathbf{a} \cdot \mathbf{b})^2}{\|\mathbf{b}\|^2}.
+            \]
+            </p>
+            <p>Simplifying, we get</p>
+            <p>
+            \[
+            = \|\mathbf{a}\|^2 - \frac{(\mathbf{a} \cdot \mathbf{b})^2}{\|\mathbf{b}\|^2}.
+            \]
+            </p>
+        </li>
+        
+        <li>
+            <p>Non-negativity implies the inequality:</p>
+            <p>Since \( f(t) \geq 0 \), we have</p>
+            <p>
+            \[
+            \|\mathbf{a}\|^2 - \frac{(\mathbf{a} \cdot \mathbf{b})^2}{\|\mathbf{b}\|^2} \geq 0.
+            \]
+            </p>
+            <p>Rearranging, this gives</p>
+            <p>
+            \[
+            (\mathbf{a} \cdot \mathbf{b})^2 \leq \|\mathbf{a}\|^2 \|\mathbf{b}\|^2.
+            \]
+            </p>
+            <p>Taking the square root of both sides (and noting that both sides are non-negative), we obtain the Cauchy-Schwarz inequality:</p>
+            <p>
+            \[
+            |\mathbf{a} \cdot \mathbf{b}| \leq \|\mathbf{a}\| \|\mathbf{b}\|.
+            \]
+            </p>
+        </li>
+    </ol>
+    
+    <p>This completes the proof.</p>
+          
+</body>
+</html>

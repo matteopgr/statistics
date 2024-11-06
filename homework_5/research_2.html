@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Independence vs. Uncorrelation</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            margin: 10;
+            padding: 0;
+            font-family: 'Lato', sans-serif;
+        }
+        p {
+            font-size: 11pt;
+        }
+        h1, h2 {
+            color: #0b5394;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Independence vs. Uncorrelation</h2>
+
+    <p><b>Independence</b> and <b>uncorrelation</b> are two fundamental concepts in probability and statistics that describe relationships between random variables, but they have different meanings and implications.</p>
+
+    <h3>Independence</h3>
+
+    <p>Two random variables \( X \) and \( Y \) are said to be <b>independent</b> if knowing the value of one variable provides no information about the value of the other. Mathematically, this is defined by:</p>
+
+    <p>
+    \[
+    P(X = x \text{ and } Y = y) = P(X = x) P(Y = y),
+    \]
+    </p>
+
+    <p>or equivalently, for their joint probability density functions, \( f_{X,Y}(x, y) = f_X(x) f_Y(y) \). In this case, the variables are "free" from each other in the probabilistic sense, and knowing the distribution of one does not help in predicting the distribution of the other.</p>
+
+    <h3>Uncorrelation</h3>
+
+    <p>Two random variables \( X \) and \( Y \) are <b>uncorrelated</b> if their <b>covariance</b> is zero, which implies that there is no linear relationship between them. The covariance between \( X \) and \( Y \) is defined by:</p>
+
+    <p>
+    \[
+    \operatorname{Cov}(X, Y) = \mathbb{E}[(X - \mathbb{E}[X])(Y - \mathbb{E}[Y])].
+    \]
+    </p>
+
+    <p>If \( \operatorname{Cov}(X, Y) = 0 \), then \( X \) and \( Y \) are uncorrelated. The correlation coefficient \( \rho(X, Y) \), which is the normalized form of covariance, is also zero in this case:</p>
+
+    <p>
+    \[
+    \rho(X, Y) = \frac{\operatorname{Cov}(X, Y)}{\sigma_X \sigma_Y} = 0,
+    \]
+    </p>
+
+    <p>where \( \sigma_X \) and \( \sigma_Y \) are the standard deviations of \( X \) and \( Y \), respectively.</p>
+
+    <h3>Key Differences</h3>
+
+    <ul>
+        <li><b>Implications</b>: Independence implies uncorrelation, but the reverse is not true. If \( X \) and \( Y \) are independent, then their covariance (and hence correlation) is zero. However, uncorrelated variables are not necessarily independent.</li>
+        <li><b>Linear vs. Non-linear Relationships</b>: Uncorrelation only indicates the absence of a linear relationship between \( X \) and \( Y \). They may still have a non-linear dependency. For example, if \( Y = X^2 \), then \( X \) and \( Y \) are uncorrelated (assuming \( X \) is symmetric about zero), but they are clearly dependent because knowing \( X \) gives information about \( Y \).</li>
+        <li><b>Measures</b>: Independence is measured by checking if the joint distribution factorizes into marginal distributions. Uncorrelation is measured by the covariance or correlation coefficient.</li>
+    </ul>
+</body>
+</html>
