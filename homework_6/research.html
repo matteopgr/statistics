@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fundamental Theorem of Calculus and Probability Distributions</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            margin: 10;
+            padding: 0;
+            font-family: 'Lato', sans-serif;
+        }
+        p {
+            font-size: 11pt;
+        }
+        h1, h2 {
+            color: #0b5394;
+        }
+    </style>
+</head>
+<body>
+    <h2>Fundamental Theorem of Calculus and Its Relationship with Density Functions and Cumulative Distribution Functions (CDFs)</h2>
+    <p>
+        The Fundamental Theorem of Calculus (FTC) provides a bridge between differentiation and integration, stating that if \( f(x) \) is continuous over an interval \( [a, b] \) and \( F(x) \) is an antiderivative of \( f(x) \) on that interval, then:
+    </p>
+    <p>
+        \[ F(x) = \int_a^x f(t) \, dt \]
+    </p>
+    <p>
+        and hence
+    </p>
+    <p>
+        \[ F'(x) = f(x). \]
+    </p>
+    <p>
+        This theorem can be applied to probability theory, where it plays a significant role in connecting a cumulative distribution function (CDF) and a probability density function (PDF).
+    </p>
+    <p>
+        In probability, if \( X \) is a continuous random variable with CDF \( F(x) \), which represents the probability that \( X \) takes a value less than or equal to \( x \), we define:
+    </p>
+    <p>
+        \[ F(x) = P(X \leq x) = \int_{-\infty}^x f(t) \, dt, \]
+    </p>
+    <p>
+        where \( f(x) \) is the probability density function (PDF) of \( X \).
+    </p>
+    <p>
+        By the FTC, differentiating \( F(x) \) with respect to \( x \) yields the PDF:
+    </p>
+    <p>
+        \[ f(x) = F'(x). \]
+    </p>
+    <p>
+        This shows that the PDF is the derivative of the CDF. Consequently, if we know the CDF of a continuous random variable, we can find its PDF by differentiation, and if we know the PDF, we can find the CDF by integration.
+    </p>
+</body>
+</html>

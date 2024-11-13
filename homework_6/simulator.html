@@ -8,6 +8,7 @@
     <style>
         body{
             font-family: 'Lato', sans-serif;
+            font-size: 11pt;
         }
         .inputs{
             display: flex;
@@ -20,8 +21,6 @@
             margin-bottom: 10px;
         }
         label{
-            font-family: 'Lato', sans-serif;
-            font-size: 11pt;
             margin-right: 5px;
             margin-left: 5px;
         }
@@ -44,8 +43,6 @@
         .stats{
             display: flex;
             justify-content: space-evenly;
-            font-family: 'Lato', sans-serif;
-            font-size: 11pt;
         }
         .fields{
             display: flex;
@@ -71,11 +68,22 @@
         <canvas id="distributionChart"></canvas>
     </div>
 
+    <div class="stats">
+        <div id="e_mean"></div>
+        <div id="t_mean"></div>
+        <div id="e_variance"></div>
+        <div id="t_variance"></div>
+    </div>
+
     <script>
 
         let distributionChartInstance = null;
         let n = document.getElementById("number").value;
         let m = document.getElementById("iterations").value;
+        let e_avg = document.getElementById("e_mean");
+        let t_avg = document.getElementById("t_mean");
+        let e_v = document.getElementById("e_variance");
+        let t_v = document.getElementById("t_variance");
 
         function generateFields(){
             n = document.getElementById("number").value;
@@ -131,6 +139,9 @@
         function simulation() {
             let results = Array.from({ length: n }, () => 0);
             let fields = Array.from({ length: n }, () => 0);
+            let mean = 0;
+            let variance = 0;
+            let M2 = 0;
             for(let i = 0; i < n; i++){
                 let f = parseFloat(document.getElementById(`field ${i+1}`).value) / 100;
                 fields[i] = f;
@@ -141,22 +152,75 @@
                 for(let j = 0; j < n; j++){
                     if(rand > sum && rand <= sum + fields[j]){
                             results[j]++;
+                            let res = updateMean_Variance(mean, M2, j + 1, i + 1);
+                            mean = res.mean;
+                            M2 = res.M2;
+                            variance = res.variance;
                             break;
                         }
                     sum += fields[j];
                 }
             }
-            return results;
+            let simualtionResults = {
+                results : results,
+                mean : mean,
+                variance : variance
+            };
+            return simualtionResults;
         }
+
+        function updateMean_Variance(mean, M2, val, n) {
+            let delta = val - mean;
+            
+            mean += delta / n;
+            
+            let delta2 = val - mean;
+            M2 += delta * delta2;
+            
+            let variance = (n > 1) ? M2 / (n - 1) : 0;
+            
+            return { variance, mean, M2 };
+        }
+
+        function updateStatistics(mean, M2, n, val, freq) {
+            let delta = val - mean;
+            
+            let newN = n + freq;
+            
+            mean += (freq * delta) / newN;
+            
+            M2 += freq * delta * (val - mean);
+            
+            let variance = (newN > 1) ? M2 / (newN - 1) : 0;
+            
+            return { mean, variance, M2, n: newN };
+        }
+
 
         function createDistributionChart(data) {
             const ctx = document.getElementById('distributionChart').getContext('2d');
             let theoreticalDistribution = Array.from({ length: data.length }, () => 0);
+            let results = data.results;
 
+            let t_mean = 0;
+            let t_variance = 0;
+            let M2 = 0;
+            let count = 0;
             for(let i = 0; i < n; i++){
                 let f = parseFloat(document.getElementById(`field ${i+1}`).value) / 100;
                 theoreticalDistribution[i] = f * m;
+                let res = updateStatistics(t_mean, M2, count, i + 1, theoreticalDistribution[i]);
+
+                t_mean = res.mean;
+                t_variance = res.variance;
+                M2 = res.M2;
+                count = res.n;
             }
+
+            e_avg.innerHTML = `The empirical mean is: ${data.mean}`;
+            t_avg.innerHTML = `The theoretical mean is: ${t_mean}`;
+            e_v.innerHTML = `The empirical variance is: ${data.variance}`;
+            t_v.innerHTML = `The theoretical variance is: ${t_variance}`;
 
             const labels = Array.from({ length: n }, (_, i) => `Field ${i + 1}`);
 
@@ -170,7 +234,7 @@
                     labels: labels,
                     datasets: [{
                         label: 'Empirical Distribution',
-                        data: data,
+                        data: results,
                         backgroundColor: 'rgba(54, 162, 235, 0.5)',
                         borderColor: 'rgba(54, 162, 235, 1)',
                         borderWidth: 1
@@ -213,11 +277,10 @@
 
             m = document.getElementById("iterations").value;
             
-            const results = simulation();
+            const simualtionResults = simulation();
+            console.log(simualtionResults);
 
-            console.log(results);
-
-            createDistributionChart(results);
+            createDistributionChart(simualtionResults);
         }
 
         window.onload = function(){
