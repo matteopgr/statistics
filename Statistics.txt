@@ -65,3 +65,12 @@ HW
 
 - Recall the fundamental theoreme of calculus and show the relationship with the concept of desnity function and cumulative distribution function (CDF) in probability theory.
 - Generate statistical variable or random variable.
+
+
+Lecture 7
+
+Kolmogov axyoms. Location and dispersion of a quantitative distribution. In case of a qualitative distribution we need an index of diversity to measure its properties, like the Shannon one. In this way we can have the entropy of the distribution.
+
+HW
+
+- take m samples of size n: repeat the prevoius homework simulation m times and compute the average of the different empirical means and variances and comapre them to the corresponding theoretical values.
