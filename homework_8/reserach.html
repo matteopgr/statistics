@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <title>Shannon Entropy and Primitive Roots</title>
+    <style>
+        body {
+            margin: 10;
+            padding: 0;
+            font-family: 'Lato', sans-serif;
+        }
+        p {
+            font-size: 11pt;
+        }
+        h1, h2 {
+            color: #0b5394;
+        }
+    </style>
+</head>
+<body>
+    <h2>Shannon Entropy and Diversity Measures of Distributions</h2>
+    <p>
+        Shannon entropy is a measure of the uncertainty or diversity in a probability distribution. 
+        For a discrete random variable \( X \) with possible outcomes \( \{x_1, x_2, \ldots, x_n\} \) 
+        and corresponding probabilities \( \{p_1, p_2, \ldots, p_n\} \), the entropy \( H(X) \) is defined as:
+    </p>
+    <p>
+        \[
+        H(X) = -\sum_{i=1}^n p_i \log_2 p_i
+        \]
+    </p>
+    <p>
+        This quantifies the average amount of information or surprise associated with the outcomes of \( X \). 
+        Higher entropy corresponds to greater unpredictability, whereas lower entropy indicates more certainty in the distribution.
+    </p>
+    <p>
+        Other diversity measures include:
+        <ul>
+            <li><strong>Gini Index</strong>: A measure of inequality in distributions.</li>
+            <li><strong>Simpson's Diversity Index</strong>: The probability that two randomly selected items belong to the same category.</li>
+            <li><strong>Effective Number of Species</strong>: Derived from entropy, representing the number of equally likely categories needed to achieve the observed diversity.</li>
+        </ul>
+    </p>
+    <h2>Primitive Root</h2>
+    <p>
+        A <strong>primitive root modulo \( p \)</strong>, where \( p \) is a prime number, is a number \( g \) such that for every 
+        integer \( a \) coprime to \( p \), there exists an integer \( k \) satisfying:
+    </p>
+    <p>
+        \[
+        g^k \equiv a \mod p
+        \]
+    </p>
+    <p>
+        Equivalently, \( g \) is a generator of the multiplicative group \( \mathbb{Z}_p^* \). 
+        This means the powers of \( g \) modulo \( p \) produce all integers from \( 1 \) to \( p-1 \).
+    </p>
+    <p>
+        For example, if \( p = 7 \), the primitive roots are \( g = 3 \) and \( g = 5 \), since their powers modulo \( 7 \) generate \( \{1, 2, 3, 4, 5, 6\} \).
+    </p>
+</body>
+</html>

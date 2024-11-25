@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caesar Cypher</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body{
+            font-family: 'Lato', sans-serif;
+            font-size: 11pt;
+            margin: 10;
+        }
+        textarea{
+            width: 100%;
+            height: 100%;
+            border: black solid 1px;
+        }
+        .main{
+            display: flex;
+            justify-content: space-around;
+        }
+        .element {
+            flex: 0 0 30%;
+            height: 500px;
+        }
+        #decryption-container{
+            display: none;
+        }
+        h1, h2 {
+            color: #0b5394;
+        }
+    </style>
+</head>
+<body>
+    <h1>Caesar Decryptor</h1>
+    <div class="main">
+        <div class="element">
+            <label for="text">Insert some text to be encrypted</label>
+            <br>
+            <textarea name="text" id="text" onchange="updateText();"></textarea><br>
+            <button onclick="encrypt();">Encrypt</button>
+            <button onclick="randomizeShift();">Randomize shift</button>
+            <select name="language" id="language" onchange="updateLanguage();">
+                <option value="english">English</option>
+                <option value="italian">Italian</option>
+            </select>
+        </div>
+        <div class="element">
+            <label for="encrypted text">The encrypted text is:</label><br>
+            <textarea id="encrypted text" disabled></textarea>
+            <button onclick="decrypt();">Decrypt</button>
+        </div>
+        <div class="element">
+            <label for="decrypted text">The decrypted text is:</label><br>
+            <textarea id="decrypted text" disabled></textarea><br>
+            <div id="shift"></div>
+        </div>
+    </div><br><br><br>
+
+    <div id="decryption-container">
+        <h3>Using bruteforce, choose the correct decryption:</h3>
+        <div id="decryptions" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+          <!-- Buttons will be inserted here -->
+        </div>
+      </div>
+
+    <script>
+        const textArea = document.getElementById("text");
+        let text = null;
+        const cypherText = document.getElementById("encrypted text");
+        const originalText = document.getElementById("decrypted text");
+        let randomShift = Math.floor(Math.random() * 26);
+        console.log(randomShift);
+        let encryptedText = null;
+        let observedShift = 0;
+        let possibleDecryptions = null;
+        let language = "english";
+
+        // Frequency distribution of letters in English (percentage)
+        const englishFrequencies = {
+            a: 8.167, b: 1.492, c: 2.782, d: 4.253, e: 12.702, f: 2.228, g: 2.015,
+            h: 6.094, i: 6.966, j: 0.153, k: 0.772, l: 4.025, m: 2.406, n: 6.749,
+            o: 7.507, p: 1.929, q: 0.095, r: 5.987, s: 6.327, t: 9.056, u: 2.758,
+            v: 0.978, w: 2.360, x: 0.150, y: 1.974, z: 0.074
+        };
+
+        const italianFrequencies = {
+            a: 11.74, b: 1.02, c: 4.51, d: 3.87, e: 11.79, f: 0.85, g: 1.40,
+            h: 0.06, i: 10.73, j: 0.02, k: 0.04, l: 6.53, m: 2.51, n: 6.71,
+            o: 9.83, p: 3.03, q: 0.49, r: 6.52, s: 4.98, t: 5.27, u: 3.22,
+            v: 1.27, w: 0.04, x: 0.02, y: 0.05, z: 0.92
+        };
+
+        function updateText(){
+            text = textArea.value;
+        }
+
+        function updateLanguage(){
+            language = document.getElementById("language").value;
+        }
+
+        function randomizeShift(){
+            randomShift = Math.floor(Math.random() * 26);
+            console.log(randomShift);
+        }
+
+        // Function to encrypt text using Caesar cipher
+        function caesarEncrypt(text, shift) {
+            return text
+                .split("")
+                .map(char => {
+                if (/[a-zA-Z]/.test(char)) {
+                    const isUpper = char === char.toUpperCase();
+                    const base = isUpper ? 65 : 97;
+                    return String.fromCharCode(((char.charCodeAt(0) - base + shift) % 26) + base);
+                }
+                return char; // Non-alphabetic characters are unchanged
+                })
+                .join("");
+            }
+
+            // Function to decrypt text using a given shift
+            function caesarDecrypt(text, shift) {
+            return caesarEncrypt(text, 26 - shift);
+        }
+
+        // Function to compute the frequency of letters in a text
+        function computeFrequencies(text) {
+            const frequencies = {};
+            const totalLetters = text.match(/[a-zA-Z]/g)?.length || 0;
+
+            for (const char of text.toLowerCase()) {
+                if (/[a-z]/.test(char)) {
+                frequencies[char] = (frequencies[char] || 0) + 1;
+                }
+            }
+
+            for (const char in frequencies) {
+                frequencies[char] = (frequencies[char] / totalLetters) * 100;
+            }
+
+            return frequencies;
+        }
+
+        // Function to calculate the chi-squared statistic for a shift
+        function chiSquaredStatistic(observed, expected) {
+            let chiSquared = 0;
+
+            for (const char in expected) {
+                const observedFreq = observed[char] || 0;
+                const expectedFreq = expected[char] || 0;
+                const diff = observedFreq - expectedFreq;
+                chiSquared += (diff ** 2) / expectedFreq;
+            }
+
+            return chiSquared;
+        }
+
+        // Function to decrypt Caesar cipher using frequency analysis
+        function decryptWithFrequencyAnalysis(text) {
+            let bestShift = 0;
+            let bestChiSquared = Infinity;
+            let t_freq = null;
+            if(document.getElementById("language").value == "english"){
+                t_freq = englishFrequencies;
+            } else{
+                t_freq = italianFrequencies;
+            }
+
+            for (let shift = 0; shift < 26; shift++) {
+                const decryptedText = caesarDecrypt(text, shift);
+                const frequencies = computeFrequencies(decryptedText);
+                const chiSquared = chiSquaredStatistic(frequencies, t_freq);
+
+                if (chiSquared < bestChiSquared) {
+                bestChiSquared = chiSquared;
+                bestShift = shift;
+                }
+            }
+
+            return { decryptedText: caesarDecrypt(text, bestShift), bestShift };
+        }
+
+        function bruteForceDecrypt(encryptedText) {
+            const possibleDecryptions = [];
+
+            for (let shift = 26; shift > 0; shift--) {
+                possibleDecryptions.push({
+                shift: shift,
+                text: caesarEncrypt(encryptedText, 26 - shift),
+                });
+            }
+
+            return possibleDecryptions;
+        }
+
+        function displayDecryptions(possibleDecryptions) {
+            document.getElementById("decryption-container").style.display = 'block';
+            const container = document.getElementById("decryptions");
+
+            possibleDecryptions.forEach(({ shift, text }) => {
+                const div = document.createElement("div");
+                div.style.marginBottom = "8px";
+
+                const button = document.createElement("button");
+                button.textContent = `Shift ${shift}`;
+                button.style.marginRight = "10px";
+                button.value = shift;
+
+                const span = document.createElement("span");
+                span.textContent = text;
+
+                button.addEventListener("click", () => handleSelection(shift));
+
+                div.appendChild(button);
+                div.appendChild(span);
+                container.appendChild(div);
+            });
+        }
+
+        function handleSelection(selectedShift) {
+            const decryptedText = possibleDecryptions[26 - selectedShift].text;
+            const observedShift = selectedShift;
+
+            // Update the UI
+            originalText.innerHTML = decryptedText;
+            document.getElementById("shift").textContent = `The chosen shift is ${observedShift}, should be ${randomShift}`;
+            document.getElementById("decryptions").innerHTML = '';
+            document.getElementById("decryption-container").style.display = 'none';
+        }
+
+        function encrypt(){
+            if(text == null || text.length <= 0){
+                alert("Can't encrypt blank text!");
+                return;
+            }
+            encryptedText = caesarEncrypt(text, randomShift);
+            cypherText.innerHTML = encryptedText;
+            document.getElementById("decryptions").innerHTML = '';
+            document.getElementById("decryption-container").style.display = 'none';
+        }
+
+        function decrypt(){
+            if(encryptedText == null || encryptedText.length <= 0){
+                alert("Can't decrypt blank text!");
+                return;
+            }
+            if(encryptedText.length > 50){
+                let result = decryptWithFrequencyAnalysis(encryptedText);
+                let decryptedText = result.decryptedText;
+                observedShift = result.bestShift;
+                originalText.innerHTML = decryptedText;
+                document.getElementById("shift").innerHTML = 
+                    `The observed shift is ${observedShift} should be ${randomShift}`;
+            } else{
+                possibleDecryptions = bruteForceDecrypt(encryptedText);
+                displayDecryptions(possibleDecryptions);
+            }
+        }
+    </script>
+</body>
+</html>
