@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <title>Sampling Mean, Variance, and Law of Large Numbers</title>
+    <style>
+        body {
+            margin: 10;
+            padding: 0;
+            font-family: 'Lato', sans-serif;
+        }
+        p {
+            font-size: 11pt;
+        }
+        h1, h2 {
+            color: #0b5394;
+        }
+    </style>
+</head>
+<body>
+    <h2>Properties of Sampling Mean and Variance</h2>
+    <h3>Sampling Mean</h3>
+    <p>The sampling mean, denoted as \( \bar{X} \), has the following properties:</p>
+    <ul>
+        <li><b>Unbiased Estimator:</b> \( E[\bar{X}] = \mu \)</li>
+        <li><b>Variance Reduction:</b> \( \text{Var}(\bar{X}) = \frac{\sigma^2}{n} \)</li>
+    </ul>
+
+    <h3>Sampling Variance</h3>
+    <p>The sampling variance measures the variability of sample means:</p>
+    <ul>
+        <li><b>Formula:</b> \( \text{Var}(\bar{X}) = \frac{\sigma^2}{n} \)</li>
+        <li><b>Decreases with Sample Size:</b> Larger \( n \) results in smaller variance.</li>
+    </ul>
+
+    <h2>Law of Large Numbers (LLN)</h2>
+    <p>The LLN states that as the sample size \( n \) increases, the sample mean \( \bar{X} \) approaches the population mean \( \mu \).</p>
+    <p><b>Mathematical Representation:</b></p>
+    <p>Weak Law: \( P\left(\left|\bar{X} - \mu\right| > \epsilon\right) \to 0 \) as \( n \to \infty \)</p>
+    <p>Strong Law: \( \bar{X} \to \mu \) almost surely as \( n \to \infty \)</p>
+
+    <h2>Applications in Cybersecurity</h2>
+    <ul>
+        <li><b>Anomaly Detection:</b> Identifying deviations from normal traffic patterns.</li>
+        <li><b>Threat Intelligence:</b> Estimating malware behavior statistics.</li>
+        <li><b>Password Security:</b> Analyzing password distributions to identify weak passwords.</li>
+    </ul>
+</body>
+</html>

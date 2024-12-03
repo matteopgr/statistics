@@ -62,7 +62,7 @@ Kormagorov measure theory with numbers between 0 and 1. Frequency and probabilit
 
 HW
 
-- Recall the fundamental theoreme of calculus and show the relationship with the concept of desnity function and cumulative distribution function (CDF) in probability theory.
+- Recall the fundamental theoreme of calculus and show the relationship with the concept of desnity function and cumulative distribution function (CDF) in probability theory. 
 - Generate statistical variable or random variable.
 
 
@@ -80,3 +80,8 @@ Lecture 8
 HW
 
 - take any text that is large enaugh, encrypt it using the ceasar cypher with a random shift and try to compute the original text withuot knowing the shift value, by using the known distribution of the various languages.
+
+
+Lecture 9
+
+Statistics can be descriptive or inferential. In the first case we process data from a well known population to obtain a synthesis of its properties. In the second case the population is unknown and we inspect data from a sample of the population. The bigger is the sample, the more precise is the statistics. In this case we can apply the probability theory.

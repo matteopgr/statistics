@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Istogramma con Chart.js</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body{
+            font-family: 'Lato', sans-serif;
+            font-size: 11pt;
+        }
+        .inputs{
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .break {
+            flex-basis: 100%;
+            height: 0;
+            margin-bottom: 10px;
+        }
+        label{
+            margin-right: 5px;
+            margin-left: 5px;
+        }
+        canvas {
+            width: 1000px;
+            margin: 20px auto;
+        }
+        .container {
+            margin-bottom: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+        .errore {
+            color: red;
+            display: none;
+            text-align: center;
+        }
+        .stats{
+            display: flex;
+            justify-content: space-evenly;
+        }
+        .stats div{
+            border: 1px solid black;
+            padding: 5px;
+        }
+        .fields{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="inputs">
+        <div>
+            <label for="numebr">Number of fields</label>
+            <input type="number" id="number" value="4" onchange="disableRandomizer();">    
+        </div>
+        <div>
+            <label for="iterations">Number of iterations</label>
+            <input type="number" id="iterations" value="20">
+        </div>
+        <div>
+            <label for="simulations">Number of simulations</label>
+            <input type="number" id="simulations" value="1000">
+        </div>
+        <button onclick="generateFields();">Generate fields</button>
+        <button disabled id="randomize" onclick="randomizeFields();">Randomize fields</button>
+        <button id="start" onclick="drawGraph();" disabled>Start simulation</button>
+        <div class="break"></div>
+        <div id="fields"></div>
+    </div>
+
+    <div class="container" id="container">
+        <canvas id="distributionChart"></canvas>
+        <canvas id="varianceChart"></canvas>
+    </div>
+
+    <div class="stats">
+        <div id="e_mean"></div>
+        <div id="t_mean"></div>
+        <div id="e_variance"></div>
+        <div id="t_variance"></div>
+    </div>
+
+    <script>
+
+        let distributionChartInstance = null;
+        let varianceChartInstance = null;
+        let n = document.getElementById("number").value;
+        let m = document.getElementById("iterations").value;
+        let c = document.getElementById("container");
+
+        function generateFields(){
+            n = document.getElementById("number").value;
+            let f = document.getElementById("fields");
+            if(f.innerHTML != ""){
+                f.innerHTML = "";
+            }
+            for(let i = 0; i < n; i++){
+                f.innerHTML += `<div><label for="field ${i + 1}">Field ${i + 1}</label><input type="number" id="field ${i + 1}" placeholder="probability" step="0.01" onchange="checkFields();"></div>`;
+            }
+            f.innerHTML += `<div id="sum">The total probability is: 0  must be 100.00</div>`
+            document.getElementById("randomize").disabled = false;
+            document.getElementById("start").disabled = true;
+        }
+
+        function randomizeFields(){
+            n = document.getElementById("number").value;
+            let sum = 0;
+            for(let i = 1; i <= n; i++){
+                if(i == n){
+                    let f = document.getElementById(`field ${i}`);
+                    let t = Math.round((100 - sum) * 100) / 100;
+                    f.value = t;
+                    sum += t;
+                    break;
+                }
+                let rand = Math.floor(Math.random() * 10000) / 100;
+                while(sum + rand > 100){
+                    rand = Math.floor(Math.random() * 10000) / 100;
+                }
+                let f = document.getElementById(`field ${i}`);
+                f.value = rand;
+                sum += rand;
+            }
+            document.getElementById("sum").innerHTML = `The total probability is: ${(Math.round(sum * 100) / 100).toFixed(2)} must be 100.00`;
+            document.getElementById("start").disabled = false;
+        }
+
+        function disableRandomizer(){
+            if(document.getElementById("number").value != n){
+                document.getElementById("randomize").disabled = true;
+            } else{
+                document.getElementById("randomize").disabled = false;
+            }
+        }
+
+        function checkFields(){
+            let sum = 0;
+            for(let i = 1; i <= n; i++){
+                let f =parseFloat(document.getElementById(`field ${i}`).value);
+                sum += f;
+            }
+            document.getElementById("sum").innerHTML = `The total probability is: ${(Math.round(sum * 100) / 100).toFixed(2)} must be 100.00`;
+            if(sum != 100){
+                document.getElementById("start").disabled = true;
+            } else {
+                document.getElementById("start").disabled = false;
+            }
+        }
+
+        function simulation() {
+            let results = Array.from({ length: n }, () => 0);
+            let fields = Array.from({ length: n }, () => 0);
+            let mean = 0;
+            let variance = 0;
+            let M2 = 0;
+            for(let i = 0; i < n; i++){
+                let f = parseFloat(document.getElementById(`field ${i+1}`).value) / 100;
+                fields[i] = f;
+            }
+            for (let i = 0; i < m; i++) {
+                let rand = Math.random();
+                let sum = 0;
+                for(let j = 0; j < n; j++){
+                    if(rand > sum && rand <= sum + fields[j]){
+                            results[j]++;
+                            let res = updateMean_Variance(mean, M2, j + 1, i + 1);
+                            mean = res.mean;
+                            M2 = res.M2;
+                            variance = res.variance;
+                            break;
+                        }
+                    sum += fields[j];
+                }
+            }
+            let simualtionResults = {
+                results : results,
+                mean : mean,
+                variance : variance
+            };
+            return simualtionResults;
+        }
+
+        function mean(array){
+            let mean = 0;
+            let count = 0;
+
+            for(let i = 0; i < array.length; i++){
+                count++;
+                mean += (array[i]- mean) / count;
+            }
+
+            return mean;
+        }
+
+        function updateMean_Variance(mean, M2, val, n) {
+            let delta = val - mean;
+            
+            mean += delta / n;
+            
+            let delta2 = val - mean;
+            M2 += delta * delta2;
+            
+            let variance = (n > 1) ? M2 / (n - 1) : 0;
+            
+            return { variance, mean, M2 };
+        }
+
+        function updateStatistics(mean, M2, n, val, freq) {
+            let delta = val - mean;
+            
+            let newN = n + freq;
+            
+            mean += (freq * delta) / newN;
+            
+            M2 += freq * delta * (val - mean);
+            
+            let variance = (newN > 1) ? M2 / (newN - 1) : 0;
+            
+            return { mean, variance, M2, n: newN };
+        }
+
+
+        function createDistributionChart(data) {
+            const ctx = document.getElementById('distributionChart').getContext('2d');
+            const v_ctx = document.getElementById('varianceChart').getContext('2d');
+            let theoreticalDistribution = Array.from({ length: data.length }, () => 0);
+
+            let t_mean = 0;
+            let t_variance = 0;
+            let M2 = 0;
+            let count = 0;
+            for(let i = 0; i < n; i++){
+                let f = parseFloat(document.getElementById(`field ${i+1}`).value) / 100;
+                theoreticalDistribution[i] = f * m;
+                let res = updateStatistics(t_mean, M2, count, i + 1, theoreticalDistribution[i]);
+
+                t_mean = res.mean;
+                t_variance = res.variance;
+                M2 = res.M2;
+                count = res.n;
+            }
+
+            document.getElementById(`t_mean`).innerHTML = `The theoretical mean is: ${t_mean}`;
+            document.getElementById(`t_variance`).innerHTML = `The theoretical variance is: ${t_variance}`;
+
+            const labels = Array.from({ length: n }, (_, i) => `Field ${i + 1}`);
+
+            if (distributionChartInstance) {
+                distributionChartInstance.destroy();
+            }
+            if (varianceChartInstance) {
+                varianceChartInstance.destroy();
+            }
+            
+
+            distributionChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Empirical Distribution',
+                        data: data.mean,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    },{
+                        label: 'Theoretical Distribution',
+                        data: theoreticalDistribution,
+                        backgroundColor: 'rgba(201, 93, 20, 0.5)',
+                        borderColor: 'rgba(201, 93, 20, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Empirical and Theoretical Distrubutions`
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+            varianceChartInstance = new Chart(v_ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Field variance',
+                        data: data.variance,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Variance Distrubution`
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            }); 
+        }
+
+        function getRandomColor() {
+            const r = Math.floor(Math.random() * 255);
+            const g = Math.floor(Math.random() * 255);
+            const b = Math.floor(Math.random() * 255);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function drawGraph(){
+
+            m = document.getElementById("iterations").value;
+            let s = document.getElementById("simulations").value;
+            
+            let simualtionResults = [];
+            let means = [];
+            let variances = [];
+
+            for(let i = 0; i < s; i++){
+                simualtionResults.push(simulation());
+                means.push(simualtionResults[i].mean);
+                variances.push(simualtionResults[i].variance);
+            }
+            let ms = [];
+            let vs = [];
+            for(let i = 0; i < n; i++){
+                let mean = 0;
+                let M2 = 0;
+                let variance = 0;
+                let count = 0;
+                for(let j = 0; j < s; j++){
+                    count++;
+                    let res = updateMean_Variance(mean, M2, simualtionResults[j].results[i], count);
+                    mean = res.mean;
+                    variance = res.variance;
+                    M2 = res.M2;
+                }
+                ms.push(mean);
+                vs.push(variance);
+            }
+            let results = {mean : ms, variance : vs};
+            createDistributionChart(results);
+
+            let average_mean = mean(means);
+            let average_varaince = mean(variances);
+
+            document.getElementById(`e_mean`).innerHTML = `The empirical mean is: ${average_mean}`;
+            document.getElementById(`e_variance`).innerHTML = `The empirical variance is: ${average_varaince}`;
+        }
+        
+    </script>
+</body>
+</html>
