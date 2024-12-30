@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" async
+      src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.0/es5/tex-mml-chtml.js">
+    </script>
+    <style>
+        body {
+            margin: 10;
+            padding: 0;
+            font-family: 'Lato', sans-serif;
+        }
+        p {
+            font-size: 11pt;
+        }
+        h1, h2 {
+            color: #0b5394;
+        }
+    </style>
+    <title>Sampling and Lebesgue–Stieltjes Integration</title>
+</head>
+<body>    
+    <h2>Sampling Mean</h2>
+    <p>The sampling mean is the average value of a sample taken from a population. For a sample \( X_1, X_2, \ldots, X_n \), the sampling mean is defined as:</p>
+    <p>\[
+    \bar{X} = \frac{1}{n} \sum_{i=1}^n X_i
+    \]</p>
+    <h3>Main Features of the Distribution of Sampling Mean:</h3>
+    <ul>
+        <li><strong>Expected Value:</strong> 
+        \[
+        \mathbb{E}[\bar{X}] = \mu
+        \]
+        This means the sampling mean is an unbiased estimator of the population mean, \( \mu \).</li>
+        
+        <li><strong>Variance:</strong> 
+        \[
+        \text{Var}(\bar{X}) = \frac{\sigma^2}{n}
+        \]
+        where \( \sigma^2 \) is the population variance. The variance of the sampling mean decreases as the sample size \( n \) increases, meaning larger samples lead to more precise estimates of the population mean.</li>
+        
+        <li><strong>Central Limit Theorem (CLT):</strong>  
+        Regardless of the population distribution, as the sample size \( n \) becomes large, the sampling mean \( \bar{X} \) approaches a normal distribution:
+        \[
+        \bar{X} \sim \mathcal{N}\left(\mu, \frac{\sigma^2}{n}\right)
+        \]
+        This holds true for any population with finite variance, making the normal approximation widely applicable.</li>
+        
+        <li><strong>Effect of Sample Size:</strong>  
+        - When \( n \) is small, the distribution of \( \bar{X} \) resembles the population distribution.  
+        - When \( n \) is large, the distribution of \( \bar{X} \) becomes approximately normal, even if the population is skewed or irregular.</li>
+    </ul>
+
+    <h2>Sampling Variance</h2>
+    <p>The sampling variance measures the variability within the sample and is given by:</p>
+    <p>\[
+    S^2 = \frac{1}{n-1} \sum_{i=1}^n (X_i - \bar{X})^2
+    \]</p>
+    <h3>Main Features of the Distribution of Sampling Variance:</h3>
+    <ul>
+        <li>\( S^2 \) is an <strong>unbiased estimator</strong> of the population variance \( \sigma^2 \).</li>
+        <li>If the population is normally distributed, \( S^2 \) follows a scaled chi-square distribution:</li>
+        <p>\[
+        S^2 \sim \frac{\sigma^2}{n-1} \chi^2_{n-1}
+        \]</p>
+        <li>The accuracy of \( S^2 \) improves as the sample size \( n \) increases.</li>
+    </ul>
+
+    <h1>Lebesgue–Stieltjes Integration</h1>
+    <p>
+        The <strong>Lebesgue–Stieltjes integral</strong> generalizes classical integration by integrating a function 
+        \( f(x) \) with respect to a non-decreasing function \( G(x) \), rather than directly with respect to the variable \( x \).
+        It is defined as:
+    </p>
+    <p>
+        \[
+        \int_a^b f(x) \, dG(x)
+        \]
+        Here,\( G(x) \) acts as a measure, allowing the integration to account for weights, jumps, or irregular distributions in \( G \).
+    </p>
+    <h2>Applications:</h2>
+    
+    <h3>Probability Theory</h3>
+    <ul>
+        <li><strong>Expectation of a Random Variable:</strong> 
+        \[
+        \mathbb{E}[f(X)] = \int_{-\infty}^\infty f(x) \, dF(x)
+        \]
+        where \( F(x) \) is the cumulative distribution function (CDF) of \( X \).</li>
+        <li><strong>Handling Mixed Distributions:</strong> The integral can manage random variables with both discrete and continuous components.</li>
+        <li><strong>Moments and Variance:</strong> The \( k \)-th moment is:
+        \[
+        \mu_k = \int_{-\infty}^\infty x^k \, dF(x)
+        \]</li>
+    </ul>
+    
+    <h3>Measure Theory</h3>
+    <ul>
+        <li><strong>General Integration:</strong> Enables integration with respect to arbitrary measures, such as counting or Dirac measures.</li>
+        <li><strong>Probability Measures:</strong> Defines probability measures on \( \mathbb{R} \) using a CDF \( F(x) \).</li>
+    </ul>
+    
+    <h3>Functional Analysis</h3>
+    <ul>
+        <li><strong>Spectral Theory:</strong> Used in the decomposition of self-adjoint operators.</li>
+        <li><strong>Operator Functions:</strong> Represents functions of operators through spectral measures.</li>
+    </ul>
+    
+    <h3>Stochastic Processes</h3>
+    <ul>
+        <li>Forms the basis for Itô calculus and renewal theory.</li>
+    </ul>
+</body>
+</html>

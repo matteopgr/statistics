@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Integral Comparison</title>
+  <style>
+    body {
+      font-family: Lato, sans-serif;
+      margin: 20px;
+      padding: 0;
+    }
+    h1 {
+        color: #0b5394;
+    }
+    label {
+      font-size: 11pt;
+      margin-right: 10px;
+    }
+    input, textarea {
+      margin: 5px 0 15px 0;
+      padding: 5px;
+      font-size: 11pt;
+      width: 100%;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      background-color: #0b5394;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    button:hover {
+      background-color: #0061c9;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+    .result h2 {
+      margin: 0 0 10px 0;
+      font-size: 1.2rem;
+    }
+    .error {
+      color: red;
+      margin-top: -10px;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <label for="function">Function to Integrate (in terms of x):</label>
+  <textarea id="function">Math.exp((-x) ** 2 / 2) / Math.sqrt(2 * Math.PI)</textarea>
+  <br>
+
+  <div>
+    <button onclick="setFunction('Math.exp((-x) ** 2 / 2) / Math.sqrt(2 * Math.PI)')">Standard Normal Distribution</button>
+    <button onclick="setFunction('x ** 2 + 3 * x + 2')">Polynomial: \(x^2 + 3x + 2\)</button>
+    <button onclick="setFunction('Math.sin(x)')">Trigonometric: sin(x)</button>
+    <button onclick="setFunction('1 / (1 + x ** 2)')">Lorentzian: \(1 / (1 + x^2)\)</button>
+  </div>
+
+  <label for="lower-bound">Lower Bound (a):</label>
+  <input type="number" id="lower-bound" value="-10">
+  <br>
+  <label for="upper-bound">Upper Bound (b):</label>
+  <input type="number" id="upper-bound" value="10">
+  <br>
+  <label for="intervals">Number of Intervals (n):</label>
+  <input type="number" id="intervals" value="10000">
+  <br>
+  <button onclick="calculateIntegrals()">Calculate Integrals</button>
+  <p id="error" class="error" style="display: none;"></p>
+  <div id="results" class="result" style="display: none;">
+    <h2>Results</h2>
+    <p><strong>Riemann Integral:</strong> <span id="riemann-result"></span></p>
+    <p><strong>Lebesgue Integral:</strong> <span id="lebesgue-result"></span></p>
+    <p><strong>Lebesgue Measure (Total Probability):</strong> <span id="measure-result"></span></p>
+  </div>
+
+  <script>
+    function setFunction(func) {
+      document.getElementById("function").value = func;
+    }
+
+    function riemannIntegral(f, a, b, n) {
+      const dx = (b - a) / n;
+      let sum = 0;
+      for (let i = 0; i < n; i++) {
+        const x = a + (i + 0.5) * dx;
+        sum += f(x) * dx;
+      }
+      return sum;
+    }
+
+    function lebesgueIntegral(f, range, n) {
+      const dx = (range[1] - range[0]) / n;
+      let measure = 0, integral = 0;
+      for (let i = 0; i < n; i++) {
+        const x = range[0] + (i + 0.5) * dx;
+        const fx = f(x);
+        const prob = fx * dx;
+        integral += x * prob;
+        measure += prob;
+      }
+      return { integral, measure };
+    }
+
+    function calculateIntegrals() {
+      const funcInput = document.getElementById("function").value;
+      const a = parseFloat(document.getElementById("lower-bound").value);
+      const b = parseFloat(document.getElementById("upper-bound").value);
+      const n = parseInt(document.getElementById("intervals").value, 10);
+      const errorElement = document.getElementById("error");
+      const resultsElement = document.getElementById("results");
+
+      try {
+        // Parse the user's input function
+        const f = new Function("x", `return ${funcInput};`);
+        
+        // Validate the function with a test evaluation
+        f(0);
+
+        // Compute integrals
+        const riemannResult = riemannIntegral(f, a, b, n);
+        const { integral: lebesgueResult, measure } = lebesgueIntegral(f, [a, b], n);
+
+        // Display results
+        document.getElementById("riemann-result").textContent = riemannResult.toFixed(6);
+        document.getElementById("lebesgue-result").textContent = lebesgueResult.toFixed(6);
+        document.getElementById("measure-result").textContent = measure.toFixed(6);
+        errorElement.style.display = "none";
+        resultsElement.style.display = "block";
+      } catch (error) {
+        // Handle errors in user input
+        errorElement.textContent = "Error in function: " + error.message;
+        errorElement.style.display = "block";
+        resultsElement.style.display = "none";
+      }
+    }
+  </script>
+</body>
+</html>

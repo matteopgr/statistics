@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Riemann and Lebesgue Integrals</title>
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+  </script>
+  <style>
+    body {
+        margin: 10;
+        padding: 0;
+        font-family: 'Lato', sans-serif;
+    }
+    p {
+        font-size: 11pt;
+    }
+    h1, h2 {
+        color: #0b5394;
+    }
+</style>
+</head>
+<body>
+  <h3>How It Works</h3>
+  <ol>
+    <li><strong>View the Function Differently:</strong>
+      <p>While the Riemann integral partitions the domain \([a, b]\) into subintervals, the Lebesgue integral partitions the range of the function \( f(x) \) into slices (level sets).</p>
+      <p>Each slice corresponds to the set of all \(x\)-values where the function \( f(x) \) takes on a specific range of values.</p>
+    </li>
+    <li><strong>Compute Contributions of Slices:</strong>
+      <p>For each slice (value range of \(f(x)\)), calculate the "measure" (or probability in probabilistic contexts) of the corresponding set of \(x\)-values.</p>
+      <p>Multiply this measure by the value of the function over the slice to get its contribution to the integral.</p>
+    </li>
+    <li><strong>Sum Up:</strong>
+      <p>The integral is the sum (or, technically, the limit of the sum) of these contributions:</p>
+      \[
+      \text{Lebesgue Integral} = \int f(x) \, d\mu(x)
+      \]
+      <p>Here, \(\mu(x)\) represents the measure (e.g., length, area, or probability) of the set where \( f(x) \) has a specific range.</p>
+    </li>
+  </ol>
+
+  <h3>Strengths</h3>
+  <ul>
+    <li>Handles functions with discontinuities more robustly than the Riemann approach.</li>
+    <li>Can integrate functions that are unbounded or have singularities, as long as the "measure" remains finite.</li>
+    <li>Essential in modern probability and functional analysis, as it works seamlessly with probability density functions.</li>
+  </ul>
+
+  <h3>Limitations</h3>
+  <ul>
+    <li>More abstract and less intuitive than the Riemann integral.</li>
+    <li>Computationally more complex for practical applications, though often the two integrals yield the same result for well-behaved functions.</li>
+  </ul>
+</body>
+</html>

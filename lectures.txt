@@ -85,3 +85,8 @@ HW
 Lecture 9
 
 Statistics can be descriptive or inferential. In the first case we process data from a well known population to obtain a synthesis of its properties. In the second case the population is unknown and we inspect data from a sample of the population. The bigger is the sample, the more precise is the statistics. In this case we can apply the probability theory.
+
+
+Lecture 10
+
+The most used integral is the Riemann's, but in probability we use the Lebesgue–Stieltjes integral, since we can have discrete functions.
